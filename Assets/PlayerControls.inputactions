@@ -85,6 +85,60 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar1",
+                    "type": "Button",
+                    "id": "7842bc13-aeb4-4229-99fa-0556c5106116",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar2",
+                    "type": "Button",
+                    "id": "2d55b3e6-3dfe-4f32-8a58-0d4595938d36",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar3",
+                    "type": "Button",
+                    "id": "f308515f-af0c-40d2-b7ca-864300530260",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar4",
+                    "type": "Button",
+                    "id": "a142e65a-1ace-4786-92a6-eabacc87851a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar5",
+                    "type": "Button",
+                    "id": "32e1d5b6-1735-4111-9187-fa8254fa460d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hotbar6",
+                    "type": "Button",
+                    "id": "22754172-8331-4db7-bb34-a86985591235",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -223,11 +277,77 @@
                 {
                     "name": "",
                     "id": "6700eb2d-f19c-49b9-a09a-fb9b4f07ebb2",
-                    "path": "<Keyboard>/e",
+                    "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "OpenInventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5ff38a01-3e2b-4a2b-bddb-44522c4d6e66",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hotbar1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "50cc7192-ded8-46c2-9fb1-86da042f8ec0",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hotbar2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "333e9ab1-c07a-4b3d-ad06-202b3e22860b",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hotbar3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "50f6c1a5-ce14-44aa-9da6-3805b82308d2",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hotbar4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "44ba90e6-ce2b-4300-af70-476f3b77096d",
+                    "path": "<Keyboard>/5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hotbar5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7fb5b454-a924-4b62-8695-f345cd3dc6e1",
+                    "path": "<Keyboard>/6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hotbar6",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

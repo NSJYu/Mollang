@@ -1,7 +1,5 @@
-// 🔹 PlayerMovement.cs (New Input System 적용 최종본) 🔹
-
 using UnityEngine;
-using UnityEngine.InputSystem; // 새로운 Input System을 위해 추가
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(SpriteRenderer))]
@@ -18,76 +16,70 @@ public class PlayerMovement : MonoBehaviour
 
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
-    private Vector2 movementInput; // 입력 값을 저장할 변수
+    private Vector2 moveInput;
 
-    // --- Input System 관련 변수 ---
     private PlayerControls playerControls;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-
-        // Input Actions 초기화
         playerControls = new PlayerControls();
     }
 
     private void OnEnable()
     {
-        playerControls.Enable();
+        // 이제 Player 액션 맵만 여기서 직접 제어합니다.
+        playerControls.Player.Enable();
     }
 
     private void OnDisable()
     {
-        playerControls.Disable();
+        playerControls.Player.Disable();
     }
 
     private void Update()
     {
-        // 1. 입력 감지 (새로운 방식)
-        HandleInput();
-
-        // 2. 시각적 처리
+        // Player 액션 맵의 Move 액션에서 값을 읽어옴
+        moveInput = playerControls.Player.Move.ReadValue<Vector2>();
         UpdateVisuals();
     }
 
     private void FixedUpdate()
     {
-        // 3. 물리적 이동 처리
-        Move();
-    }
-
-    private void HandleInput()
-    {
-        // Player 액션 맵의 Move 액션에서 Vector2 값을 읽어옴
-        movementInput = playerControls.Player.Move.ReadValue<Vector2>();
-
-        // 대각선 이동 방지
-        if (Mathf.Abs(movementInput.x) > 0.5f)
-        {
-            movementInput.y = 0;
-        }
+        rb.MovePosition(rb.position + moveInput.normalized * moveSpeed * Time.fixedDeltaTime);
     }
 
     private void UpdateVisuals()
     {
-        // 스프라이트 변경 로직 (이전과 거의 동일)
-        // movementInput의 크기가 0보다 클 때만 (즉, 움직일 때만) 스프라이트를 바꿈
-        if (movementInput.sqrMagnitude > 0.01f)
+        if (moveInput.sqrMagnitude > 0.1f)
         {
-            if (movementInput.x > 0)
-                spriteRenderer.sprite = spriteRight;
-            else if (movementInput.x < 0)
-                spriteRenderer.sprite = spriteLeft;
-            else if (movementInput.y > 0)
-                spriteRenderer.sprite = spriteUp;
-            else if (movementInput.y < 0)
-                spriteRenderer.sprite = spriteDown;
+            if (Mathf.Abs(moveInput.x) > Mathf.Abs(moveInput.y))
+            {
+                if (moveInput.x > 0) spriteRenderer.sprite = spriteRight;
+                else spriteRenderer.sprite = spriteLeft;
+            }
+            else
+            {
+                if (moveInput.y > 0) spriteRenderer.sprite = spriteUp;
+                else spriteRenderer.sprite = spriteDown;
+            }
         }
     }
 
-    private void Move()
+    /// <summary>
+    /// 외부(Inventory.cs)에서 호출하여 플레이어의 게임 플레이 입력을 활성화합니다.
+    /// </summary>
+    public void EnableGameplayInput()
     {
-        rb.MovePosition(rb.position + movementInput.normalized * moveSpeed * Time.fixedDeltaTime);
+        playerControls.Player.Enable();
+    }
+
+    /// <summary>
+    /// 외부(Inventory.cs)에서 호출하여 플레이어의 게임 플레이 입력을 비활성화합니다.
+    /// </summary>
+    public void DisableGameplayInput()
+    {
+        playerControls.Player.Disable();
     }
 }
