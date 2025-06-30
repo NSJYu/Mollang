@@ -3,200 +3,32 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
-
+using System.Collections.Generic;
 public class Inventory : MonoBehaviour
 {
     [Header("UI 설정 (직접 연결)")]
     [SerializeField] private GameObject inventoryUIPanel;
     [SerializeField] private GameObject cursorItemObject;
+    [SerializeField] private Transform inventoryGrid;
     [SerializeField] private Transform inventoryHotbarGrid;
-
-    [Header("플레이어 참조")]
+    [Header("플레이어 및 아이템 설정")]
     [SerializeField] private PlayerMovement playerMovement;
-
-    private Image cursorItemIcon;
-    private TextMeshProUGUI cursorQuantityText;
-    private bool isOpen = false;
-    private Item liftedItem;
-    private ItemSlot originalSlot;
-    private PlayerControls playerControls;
-    private Hotbar mainHotbar;
-
-    private void Awake()
-    {
-        playerControls = new PlayerControls();
-        if (cursorItemObject != null)
-        {
-            cursorItemIcon = cursorItemObject.GetComponent<Image>();
-            cursorQuantityText = cursorItemObject.GetComponentInChildren<TextMeshProUGUI>();
-        }
-
-        // Inspector에서 플레이어 연결을 깜빡했다면, 씬에서 직접 찾기
-        if (playerMovement == null)
-        {
-            playerMovement = FindObjectOfType<PlayerMovement>();
-            if(playerMovement == null) Debug.LogError("씬에 PlayerMovement 스크립트가 없습니다!");
-        }
-    }
-
-    private void OnEnable()
-    {
-        // InventoryManager는 UI 입력만 담당합니다.
-        playerControls.UI.Enable();
-        playerControls.UI.OpenInventory.performed += ToggleInventory;
-    }
-
-    private void OnDisable()
-    {
-        playerControls.UI.Disable();
-        playerControls.UI.OpenInventory.performed -= ToggleInventory;
-    }
-
-    private void Start()
-    {
-        if (inventoryUIPanel != null) inventoryUIPanel.SetActive(false);
-        if (cursorItemObject != null) cursorItemObject.SetActive(false);
-
-        mainHotbar = FindObjectOfType<Hotbar>();
-        if (mainHotbar == null) Debug.LogError("씬에서 Hotbar 스크립트를 찾을 수 없습니다!");
-    }
-
-    public void ToggleInventory(InputAction.CallbackContext context)
-    {
-        if (inventoryUIPanel == null || playerMovement == null) return;
-
-        isOpen = !isOpen;
-        inventoryUIPanel.SetActive(isOpen);
-
-        // 액션 맵 전환 로직
-        if (isOpen)
-        {
-            // 인벤토리가 열리면, 플레이어 움직임 입력을 끈다.
-            playerMovement.DisableGameplayInput();
-            SyncHotbarToInventory();
-        }
-        else
-        {
-            // 인벤토리가 닫히면, 플레이어 움직임 입력을 다시 켠다.
-            playerMovement.EnableGameplayInput();
-            // 닫을 때는 실시간 동기화가 이미 다 처리했으므로 별도 동기화 필요 없음
-        }
-
-        // 인벤토리를 닫을 때 들고 있던 아이템이 있다면 취소
-        if (!isOpen && liftedItem != null)
-        {
-            CancelLift();
-        }
-    }
-
-    private void Update()
-    {
-        if (isOpen && liftedItem != null && cursorItemObject != null)
-        {
-            (cursorItemObject.transform as RectTransform).position = Mouse.current.position.ReadValue();
-        }
-
-        // 인벤토리 바깥을 클릭했을 때 들고 있던 아이템을 되돌림
-        if (Mouse.current.leftButton.wasPressedThisFrame && !EventSystem.current.IsPointerOverGameObject())
-        {
-            if (liftedItem != null)
-            {
-                CancelLift();
-            }
-        }
-    }
-
-    public void OnSlotClicked(ItemSlot clickedSlot)
-    {
-        if (!isOpen) return;
-        ItemSlot prevOriginalSlot = originalSlot;
-
-        if (liftedItem == null)
-        {
-            if (clickedSlot.item != null)
-            {
-                liftedItem = clickedSlot.item;
-                originalSlot = clickedSlot;
-                clickedSlot.SetItem(null);
-            }
-        }
-        else
-        {
-            if (clickedSlot.item != null)
-            {
-                Item itemInNewSlot = clickedSlot.item;
-                clickedSlot.SetItem(liftedItem);
-                liftedItem = itemInNewSlot;
-                originalSlot = clickedSlot;
-            }
-            else
-            {
-                clickedSlot.SetItem(liftedItem);
-                liftedItem = null;
-                originalSlot = null;
-            }
-        }
-
-        UpdateCursorUI();
-
-        // 데이터가 변경된 슬롯들을 확인하고 메인 핫바에 즉시 반영
-        CheckAndSyncHotbar(clickedSlot);
-        if (prevOriginalSlot != null && prevOriginalSlot != clickedSlot)
-        {
-            CheckAndSyncHotbar(prevOriginalSlot);
-        }
-    }
-
-    private void CheckAndSyncHotbar(ItemSlot changedSlot)
-    {
-        if (changedSlot == null || inventoryHotbarGrid == null || mainHotbar == null) return;
-
-        // 변경된 슬롯이 인벤토리 안의 핫바 슬롯인지 확인
-        if (changedSlot.transform.parent == inventoryHotbarGrid)
-        {
-            int slotIndex = changedSlot.transform.GetSiblingIndex();
-            mainHotbar.UpdateSlot(slotIndex, changedSlot.item);
-        }
-    }
-
-    // 인벤토리를 열 때, 메인 핫바의 데이터를 인벤토리 핫바로 복사
-    private void SyncHotbarToInventory()
-    {
-        if (mainHotbar == null || inventoryHotbarGrid == null) return;
-        for (int i = 0; i < mainHotbar.hotbarSlots.Length; i++)
-        {
-            ItemSlot inventorySlot = inventoryHotbarGrid.GetChild(i)?.GetComponent<ItemSlot>();
-            if (inventorySlot != null)
-            {
-                inventorySlot.SetItem(mainHotbar.hotbarSlots[i].item);
-            }
-        }
-    }
-
-    private void UpdateCursorUI()
-    {
-        if (cursorItemObject == null) return;
-
-        if (liftedItem != null)
-        {
-            cursorItemObject.SetActive(true);
-            cursorItemIcon.sprite = liftedItem.icon;
-            cursorQuantityText.enabled = liftedItem.isStackable && liftedItem.quantity > 1;
-            cursorQuantityText.text = liftedItem.quantity.ToString();
-        }
-        else
-        {
-            cursorItemObject.SetActive(false);
-        }
-    }
-
-    private void CancelLift()
-    {
-        if (originalSlot == null) return;
-        originalSlot.SetItem(liftedItem);
-        CheckAndSyncHotbar(originalSlot); // 취소 시에도 동기화
-        liftedItem = null;
-        originalSlot = null;
-        UpdateCursorUI();
-    }
+    [SerializeField] private GameObject fieldItemPrefab;
+    private Image cursorItemIcon; private TextMeshProUGUI cursorQuantityText; private bool isOpen = false; private Item liftedItem; private ItemSlot originalSlot; private Hotbar mainHotbar; private ItemSlot hoveredSlot; private List<ItemSlot> allInventorySlots = new List<ItemSlot>(); private PlayerControls playerControls;
+    private void Awake() { playerControls = PlayerControlsManager.playerControls; if (cursorItemObject != null) { cursorItemIcon = cursorItemObject.GetComponent<Image>(); cursorQuantityText = cursorItemObject.GetComponentInChildren<TextMeshProUGUI>(); } if (playerMovement == null) playerMovement = FindObjectOfType<PlayerMovement>(); if(inventoryGrid != null) inventoryGrid.GetComponentsInChildren<ItemSlot>(true, allInventorySlots); if(inventoryHotbarGrid != null) inventoryHotbarGrid.GetComponentsInChildren<ItemSlot>(true, allInventorySlots); }
+    private void OnEnable() { if(playerControls == null) return; playerControls.UI.Enable(); playerControls.UI.OpenInventory.performed += ToggleInventory; playerControls.UI.DropItem.performed += OnDropItemKeyPressed; }
+    private void OnDisable() { if(playerControls == null) return; playerControls.UI.Disable(); playerControls.UI.OpenInventory.performed -= ToggleInventory; playerControls.UI.DropItem.performed -= OnDropItemKeyPressed; }
+    private void Start() { if (inventoryUIPanel != null) inventoryUIPanel.SetActive(false); if (cursorItemObject != null) cursorItemObject.SetActive(false); mainHotbar = FindObjectOfType<Hotbar>(); }
+    public void ToggleInventory(InputAction.CallbackContext context) { if (inventoryUIPanel == null || playerMovement == null) return; isOpen = !isOpen; inventoryUIPanel.SetActive(isOpen); if (isOpen) { playerMovement.DisableGameplayInput(); SyncHotbarToInventory(); } else { playerMovement.EnableGameplayInput(); if (liftedItem != null) CancelLift(); } }
+    private void OnDropItemKeyPressed(InputAction.CallbackContext context) { if (isOpen && EventSystem.current.IsPointerOverGameObject() && hoveredSlot != null && hoveredSlot.item != null) { DropItem(hoveredSlot.item, 1); if (hoveredSlot.item.quantity <= 0) hoveredSlot.SetItem(null); else hoveredSlot.UpdateSlotUI(); CheckAndSyncHotbar(hoveredSlot); } }
+    private void Update() { if (isOpen && liftedItem != null && cursorItemObject != null) { (cursorItemObject.transform as RectTransform).position = Mouse.current.position.ReadValue(); } if (Mouse.current.leftButton.wasPressedThisFrame) { if (isOpen) { if (EventSystem.current.IsPointerOverGameObject()) { if (hoveredSlot != null) OnSlotClicked(hoveredSlot); } else { if (liftedItem != null) { DropItem(liftedItem, liftedItem.quantity); liftedItem = null; originalSlot = null; UpdateCursorUI(); } } } } }
+    public void SetHoveredSlot(ItemSlot slot) { hoveredSlot = slot; }
+    public bool IsOpen() { return isOpen; }
+    public void OnSlotClicked(ItemSlot clickedSlot) { ItemSlot prevOriginalSlot = originalSlot; if (liftedItem == null) { if (clickedSlot.item != null) { liftedItem = clickedSlot.item; originalSlot = clickedSlot; clickedSlot.SetItem(null); } } else { if (clickedSlot.item != null) { Item itemInNewSlot = clickedSlot.item; clickedSlot.SetItem(liftedItem); liftedItem = itemInNewSlot; originalSlot = clickedSlot; } else { clickedSlot.SetItem(liftedItem); liftedItem = null; originalSlot = null; } } UpdateCursorUI(); CheckAndSyncHotbar(clickedSlot); if (prevOriginalSlot != null && prevOriginalSlot != clickedSlot) CheckAndSyncHotbar(prevOriginalSlot); }
+    public void DropItem(Item item, int amount) { if (fieldItemPrefab == null || playerMovement == null || item == null) return; int dropAmount = Mathf.Min(amount, item.quantity); if (dropAmount <= 0) return; Item itemToInstantiate = Instantiate(item); itemToInstantiate.quantity = dropAmount; item.quantity -= dropAmount; Vector3 dropPosition = playerMovement.transform.position; GameObject itemObject = Instantiate(fieldItemPrefab, dropPosition, Quaternion.identity); itemObject.GetComponent<FieldItem>().SetItem(itemToInstantiate); }
+    public bool AddItem(Item itemToAdd) { if (itemToAdd.isStackable) { foreach (ItemSlot slot in allInventorySlots) { if (slot.item != null && slot.item.itemName == itemToAdd.itemName) { slot.item.quantity += itemToAdd.quantity; slot.UpdateSlotUI(); CheckAndSyncHotbar(slot); return true; } } } foreach (ItemSlot slot in allInventorySlots) { if (slot.item == null) { slot.SetItem(itemToAdd); CheckAndSyncHotbar(slot); return true; } } Debug.Log("인벤토리가 가득 찼습니다!"); DropItem(itemToAdd, itemToAdd.quantity); return false; }
+    private void CheckAndSyncHotbar(ItemSlot changedSlot) { if (changedSlot == null || inventoryHotbarGrid == null || mainHotbar == null || !changedSlot.transform.IsChildOf(inventoryHotbarGrid)) return; int slotIndex = changedSlot.transform.GetSiblingIndex(); mainHotbar.UpdateSlot(slotIndex, changedSlot.item); }
+    private void SyncHotbarToInventory() { if (mainHotbar == null || inventoryHotbarGrid == null) return; for (int i = 0; i < mainHotbar.hotbarSlots.Length; i++) { ItemSlot inventorySlot = inventoryHotbarGrid.GetChild(i)?.GetComponent<ItemSlot>(); if (inventorySlot != null) inventorySlot.SetItem(mainHotbar.hotbarSlots[i].item); } }
+    private void UpdateCursorUI() { if (cursorItemObject == null) return; if (liftedItem != null) { cursorItemObject.SetActive(true); cursorItemIcon.sprite = liftedItem.icon; cursorQuantityText.enabled = liftedItem.isStackable && liftedItem.quantity > 1; cursorQuantityText.text = liftedItem.quantity.ToString(); } else { cursorItemObject.SetActive(false); } }
+    private void CancelLift() { if (originalSlot == null) return; originalSlot.SetItem(liftedItem); CheckAndSyncHotbar(originalSlot); liftedItem = null; originalSlot = null; UpdateCursorUI(); }
 }

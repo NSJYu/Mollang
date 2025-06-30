@@ -1,13 +1,14 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class ItemSlot : MonoBehaviour, IPointerClickHandler
+public class ItemSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public Item item;
     [SerializeField] private Image icon;
     [SerializeField] private TextMeshProUGUI quantityText;
+    private Inventory inventory;
 
     private void Awake()
     {
@@ -17,21 +18,18 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         quantityText = transform.Find("QuantityText")?.GetComponent<TextMeshProUGUI>();
         if (quantityText == null) Debug.LogError(gameObject.name + "에서 QuantityText를 찾을 수 없습니다.");
 
+        inventory = FindObjectOfType<Inventory>();
+        if (inventory == null) Debug.LogError("ItemSlot이 Inventory를 찾을 수 없습니다!");
+
         UpdateSlotUI();
     }
 
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            FindObjectOfType<Inventory>()?.OnSlotClicked(this);
-        }
-    }
+    public void OnPointerEnter(PointerEventData eventData) { inventory?.SetHoveredSlot(this); }
+    public void OnPointerExit(PointerEventData eventData) { inventory?.SetHoveredSlot(null); }
 
     public void UpdateSlotUI()
     {
         if (icon == null || quantityText == null) return;
-
         if (item != null && item.icon != null)
         {
             icon.gameObject.SetActive(true);

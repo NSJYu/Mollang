@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-// ... (이전과 동일한 내용)
 public enum ItemType { Equipment, Consumable, Etc }
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class Item : ScriptableObject

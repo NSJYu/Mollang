@@ -145,8 +145,8 @@ GameObject:
   - component: {fileID: 8633701185392720406}
   - component: {fileID: 870855774313981145}
   - component: {fileID: 662171557888686524}
-  - component: {fileID: 3121291783372100617}
   - component: {fileID: 4062561668410018696}
+  - component: {fileID: 8559626014436207501}
   m_Layer: 5
   m_Name: ItemSlot_Prefab
   m_TagString: Untagged
@@ -213,21 +213,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3121291783372100617
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6068760818243111236}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6bded2ee82cbfe24f877b3c50b490630, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  icon: {fileID: 7426193396474368779}
-  quantityText: {fileID: 477352986188949143}
 --- !u!225 &4062561668410018696
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -240,6 +225,23 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &8559626014436207501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6068760818243111236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bded2ee82cbfe24f877b3c50b490630, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemData:
+    itemBase: {fileID: 0}
+    quantity: 0
+  icon: {fileID: 7426193396474368779}
+  quantityText: {fileID: 477352986188949143}
 --- !u!1 &8722566177337433789
 GameObject:
   m_ObjectHideFlags: 0
@@ -299,7 +301,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
