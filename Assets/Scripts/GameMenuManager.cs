@@ -214,8 +214,36 @@ public class GameMenuManager : MonoBehaviour
         }
 
         // 마우스 커서 표시/숨김
-        Cursor.visible = paused;
-        Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
+        if (paused)
+        {
+            // 메뉴가 열릴 때는 항상 커서 표시
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            // 게임 재개 시: 다른 UI가 열려있는지 확인
+            bool shouldShowCursor = false;
+
+            // 인벤토리가 열려있으면 커서 유지
+            if (inventoryManager != null && inventoryManager.IsOpen())
+            {
+                shouldShowCursor = true;
+                Debug.Log("🖱️ 인벤토리가 열려있어서 커서 유지");
+            }
+
+            // 설정 패널이 열려있으면 커서 유지
+            if (settingsPanel != null && settingsPanel.activeSelf)
+            {
+                shouldShowCursor = true;
+                Debug.Log("🖱️ 설정 패널이 열려있어서 커서 유지");
+            }
+
+            Cursor.visible = shouldShowCursor;
+            Cursor.lockState = shouldShowCursor ? CursorLockMode.None : CursorLockMode.Locked;
+
+            Debug.Log($"🖱️ 커서 상태: visible={Cursor.visible}, lockState={Cursor.lockState}");
+        }
     }
 
     public void ResumeGame()
