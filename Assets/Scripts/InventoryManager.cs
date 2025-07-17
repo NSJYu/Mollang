@@ -203,11 +203,34 @@ public class InventoryManager : MonoBehaviour
         {
             playerMovement.DisableGameplayInput();
             SyncHotbarToInventory();
+
+            // 인벤토리 열 때 커서 표시
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+            Debug.Log("🖱️ 인벤토리 열림 - 커서 표시");
         }
         else
         {
             playerMovement.EnableGameplayInput();
             if (liftedItem != null) CancelLift();
+
+            // 인벤토리 닫을 때 다른 UI가 열려있는지 확인
+            bool shouldHideCursor = true;
+
+            // GameMenuManager의 메뉴가 열려있는지 확인
+            GameMenuManager gameMenuManager = FindObjectOfType<GameMenuManager>();
+            if (gameMenuManager != null && gameMenuManager.IsMenuOpen())
+            {
+                shouldHideCursor = false;
+                Debug.Log("🖱️ 게임 메뉴가 열려있어서 커서 유지");
+            }
+
+            if (shouldHideCursor)
+            {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                Debug.Log("🖱️ 인벤토리 닫힘 - 커서 숨김");
+            }
         }
     }
 
@@ -758,4 +781,38 @@ public class InventoryManager : MonoBehaviour
 
     // Public properties for external access
     public Transform InventoryHotbarGrid => inventoryHotbarGrid;
+
+    public void CloseInventory()
+    {
+        if (inventoryUIPanel == null || playerMovement == null || !isOpen) return;
+
+        isOpen = false;
+        inventoryUIPanel.SetActive(false);
+        playerMovement.EnableGameplayInput();
+
+        if (liftedItem != null)
+        {
+            CancelLift();
+        }
+
+        // 인벤토리 닫을 때 다른 UI가 열려있는지 확인
+        bool shouldHideCursor = true;
+
+        // GameMenuManager의 메뉴가 열려있는지 확인
+        GameMenuManager gameMenuManager = FindObjectOfType<GameMenuManager>();
+        if (gameMenuManager != null && gameMenuManager.IsMenuOpen())
+        {
+            shouldHideCursor = false;
+            Debug.Log("🖱️ 게임 메뉴가 열려있어서 커서 유지 (CloseInventory)");
+        }
+
+        if (shouldHideCursor)
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            Debug.Log("🖱️ 인벤토리 닫힘 - 커서 숨김 (CloseInventory)");
+        }
+
+        Debug.Log("인벤토리 닫힘 (메뉴에서 호출)");
+    }
 }
