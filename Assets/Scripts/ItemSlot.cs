@@ -8,7 +8,7 @@ public class ItemSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Item item;
     [SerializeField] private Image icon;
     [SerializeField] private TextMeshProUGUI quantityText;
-    private Inventory inventory;
+    private InventoryManager inventory;
 
     private void Awake()
     {
@@ -18,10 +18,17 @@ public class ItemSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         quantityText = transform.Find("QuantityText")?.GetComponent<TextMeshProUGUI>();
         if (quantityText == null) Debug.LogError(gameObject.name + "에서 QuantityText를 찾을 수 없습니다.");
 
-        inventory = FindObjectOfType<Inventory>();
-        if (inventory == null) Debug.LogError("ItemSlot이 Inventory를 찾을 수 없습니다!");
-
         UpdateSlotUI();
+    }
+
+    private void Start()
+    {
+        // FindObjectOfType으로 InventoryManager 찾기
+        inventory = FindObjectOfType<InventoryManager>();
+        if (inventory == null) 
+        {
+            Debug.LogError("ItemSlot이 InventoryManager를 찾을 수 없습니다!");
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData) { inventory?.SetHoveredSlot(this); }
