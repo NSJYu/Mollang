@@ -758,4 +758,20 @@ public class InventoryManager : MonoBehaviour
 
     // Public properties for external access
     public Transform InventoryHotbarGrid => inventoryHotbarGrid;
+
+    public void CloseInventory()
+    {
+        if (inventoryUIPanel == null || playerMovement == null || !isOpen) return;
+
+        isOpen = false;
+        inventoryUIPanel.SetActive(false);
+        playerMovement.EnableGameplayInput();
+        
+        if (liftedItem != null) 
+        {
+            CancelLift();
+        }
+        
+        Debug.Log("인벤토리 닫힘 (메뉴에서 호출)");
+    }
 }
