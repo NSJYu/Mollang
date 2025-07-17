@@ -8,16 +8,16 @@
 
 ## 🔧 Stack
 
-- **Unity** 2022.3+
-- **C#** with New Input System
-- **Git Flow** branch management
+-   **Unity** 2022.3+
+-   **C#** with New Input System
+-   **Git Flow** branch management
 
 ## 📁 Structure
 
 ```
 Assets/
 ├── Scripts/     # Game logic
-├── Scenes/      # Unity scenes  
+├── Scenes/      # Unity scenes
 ├── Sprites/     # 2D assets
 └── UI/          # Interface
 ```
@@ -32,9 +32,9 @@ cd Mollang
 
 ## 🌿 Branches
 
-- `main` - Stable release
-- `develop` - Integration  
-- `feature/*` - New features
+-   `main` - Stable release
+-   `develop` - Integration
+-   `feature/*` - New features
 
 ## 📄 License
 
@@ -42,4 +42,4 @@ MIT License - see [LICENSE](LICENSE) for details
 
 ---
 
-*Built with Unity & ❤️*
+_Built with Unity & ❤️_
