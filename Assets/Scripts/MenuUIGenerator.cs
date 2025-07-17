@@ -20,9 +20,12 @@ public class MenuUIGenerator : MonoBehaviour
 
         // 메인 메뉴 패널 생성
         GameObject menuPanel = CreateMenuPanel(canvas.transform);
-        
-        // 설정 패널 생성  
+
+        // 설정 패널 생성
         GameObject settingsPanel = CreateSettingsPanel(canvas.transform);
+
+        // GameMenuManager에 자동 할당 시도
+        TryAutoAssignToGameMenuManager(menuPanel, settingsPanel);
 
         Debug.Log("ESC 메뉴 UI가 자동 생성되었습니다!");
         Debug.Log("GameMenuManager 컴포넌트에 생성된 UI 요소들을 할당해주세요.");
@@ -33,10 +36,10 @@ public class MenuUIGenerator : MonoBehaviour
         // 메인 패널
         GameObject menuPanel = new GameObject("MenuPanel");
         menuPanel.transform.SetParent(parent, false);
-        
+
         Image panelImage = menuPanel.AddComponent<Image>();
         panelImage.color = new Color(0, 0, 0, 0.8f); // 반투명 검은색
-        
+
         RectTransform panelRect = menuPanel.GetComponent<RectTransform>();
         panelRect.anchorMin = Vector2.zero;
         panelRect.anchorMax = Vector2.one;
@@ -46,7 +49,7 @@ public class MenuUIGenerator : MonoBehaviour
         // 메뉴 컨텐츠 영역
         GameObject content = new GameObject("MenuContent");
         content.transform.SetParent(menuPanel.transform, false);
-        
+
         RectTransform contentRect = content.GetComponent<RectTransform>();
         contentRect.anchorMin = new Vector2(0.5f, 0.5f);
         contentRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -70,10 +73,10 @@ public class MenuUIGenerator : MonoBehaviour
         // 설정 패널
         GameObject settingsPanel = new GameObject("SettingsPanel");
         settingsPanel.transform.SetParent(parent, false);
-        
+
         Image panelImage = settingsPanel.AddComponent<Image>();
         panelImage.color = new Color(0, 0, 0, 0.8f);
-        
+
         RectTransform panelRect = settingsPanel.GetComponent<RectTransform>();
         panelRect.anchorMin = Vector2.zero;
         panelRect.anchorMax = Vector2.one;
@@ -83,7 +86,7 @@ public class MenuUIGenerator : MonoBehaviour
         // 설정 컨텐츠 영역
         GameObject content = new GameObject("SettingsContent");
         content.transform.SetParent(settingsPanel.transform, false);
-        
+
         RectTransform contentRect = content.GetComponent<RectTransform>();
         contentRect.anchorMin = new Vector2(0.5f, 0.5f);
         contentRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -104,12 +107,12 @@ public class MenuUIGenerator : MonoBehaviour
     {
         GameObject buttonObj = new GameObject(name);
         buttonObj.transform.SetParent(parent, false);
-        
+
         Image buttonImage = buttonObj.AddComponent<Image>();
         buttonImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-        
+
         Button button = buttonObj.AddComponent<Button>();
-        
+
         RectTransform buttonRect = buttonObj.GetComponent<RectTransform>();
         buttonRect.anchorMin = new Vector2(0.5f, 0.5f);
         buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -119,13 +122,13 @@ public class MenuUIGenerator : MonoBehaviour
         // 버튼 텍스트
         GameObject textObj = new GameObject("Text");
         textObj.transform.SetParent(buttonObj.transform, false);
-        
+
         TextMeshProUGUI textComponent = textObj.AddComponent<TextMeshProUGUI>();
         textComponent.text = text;
         textComponent.fontSize = 16;
         textComponent.color = Color.white;
         textComponent.alignment = TextAlignmentOptions.Center;
-        
+
         RectTransform textRect = textObj.GetComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
@@ -139,13 +142,13 @@ public class MenuUIGenerator : MonoBehaviour
     {
         GameObject textObj = new GameObject(name);
         textObj.transform.SetParent(parent, false);
-        
+
         TextMeshProUGUI textComponent = textObj.AddComponent<TextMeshProUGUI>();
         textComponent.text = text;
         textComponent.fontSize = fontSize;
         textComponent.color = Color.white;
         textComponent.alignment = TextAlignmentOptions.Center;
-        
+
         RectTransform textRect = textObj.GetComponent<RectTransform>();
         textRect.anchorMin = new Vector2(0.5f, 0.5f);
         textRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -154,5 +157,60 @@ public class MenuUIGenerator : MonoBehaviour
 
         return textObj;
     }
+
+    private void TryAutoAssignToGameMenuManager(GameObject menuPanel, GameObject settingsPanel)
+    {
+        GameMenuManager gameMenuManager = FindObjectOfType<GameMenuManager>();
+        if (gameMenuManager == null)
+        {
+            Debug.LogWarning("⚠️ GameMenuManager를 찾을 수 없어서 자동 할당을 건너뜁니다.");
+            return;
+        }
+
+        Debug.Log("🔧 GameMenuManager에 UI 요소들을 자동 할당 중...");
+
+        // 리플렉션을 사용하여 private 필드에 할당
+        System.Type gmType = typeof(GameMenuManager);
+
+        // 메뉴 패널들 할당
+        var menuPanelField = gmType.GetField("menuPanel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        menuPanelField?.SetValue(gameMenuManager, menuPanel);
+
+        var settingsPanelField = gmType.GetField("settingsPanel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        settingsPanelField?.SetValue(gameMenuManager, settingsPanel);
+
+        // 메인 메뉴 버튼들 할당
+        AssignButtonToField(gameMenuManager, "resumeButton", "MenuPanel/MenuContent/ResumeButton");
+        AssignButtonToField(gameMenuManager, "settingsButton", "MenuPanel/MenuContent/SettingsButton");
+        AssignButtonToField(gameMenuManager, "mainMenuButton", "MenuPanel/MenuContent/MainMenuButton");
+        AssignButtonToField(gameMenuManager, "quitButton", "MenuPanel/MenuContent/QuitButton");
+
+        // 설정 메뉴 뒤로가기 버튼 할당
+        AssignButtonToField(gameMenuManager, "backButton", "SettingsPanel/SettingsContent/BackButton");
+
+        Debug.Log("✅ GameMenuManager에 UI 요소들 자동 할당 완료!");
+    }
+
+    private void AssignButtonToField(GameMenuManager manager, string fieldName, string buttonPath)
+    {
+        GameObject buttonObj = GameObject.Find(buttonPath);
+        if (buttonObj != null)
+        {
+            UnityEngine.UI.Button button = buttonObj.GetComponent<UnityEngine.UI.Button>();
+            if (button != null)
+            {
+                System.Type gmType = typeof(GameMenuManager);
+                var field = gmType.GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                field?.SetValue(manager, button);
+                Debug.Log($"✅ {fieldName} 할당 완료");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ {buttonPath}를 찾을 수 없습니다.");
+        }
+    }
+
+    // ...existing code...
 }
 #endif

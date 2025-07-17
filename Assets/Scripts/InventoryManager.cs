@@ -766,12 +766,12 @@ public class InventoryManager : MonoBehaviour
         isOpen = false;
         inventoryUIPanel.SetActive(false);
         playerMovement.EnableGameplayInput();
-        
-        if (liftedItem != null) 
+
+        if (liftedItem != null)
         {
             CancelLift();
         }
-        
+
         Debug.Log("인벤토리 닫힘 (메뉴에서 호출)");
     }
 }
